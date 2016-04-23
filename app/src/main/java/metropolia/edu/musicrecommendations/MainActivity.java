@@ -1,14 +1,10 @@
 package metropolia.edu.musicrecommendations;
 
-import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 
-import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -17,14 +13,15 @@ import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
+import com.spotify.sdk.android.player.Spotify;
 
 public class MainActivity extends ActionBarActivity implements
         PlayerNotificationCallback, ConnectionStateCallback {
 
     // TODO: Replace with your client ID
-    private static final String CLIENT_ID = "";
+    private static final String CLIENT_ID = "1e526b554f064d828866b8042c1918c6";
     // TODO: Replace with your redirect URI
-    private static final String REDIRECT_URI = "";
+    private static final String REDIRECT_URI = "musicrecommendations://callback";
 
     // Request code that will be passed together with authentication result to the onAuthenticationResult callback
     // Can be any integer
