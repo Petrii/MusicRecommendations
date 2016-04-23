@@ -13,6 +13,6 @@ public class PlaybackBroadcastReceiver extends BroadcastReceiver {
         Intent mIntent = new Intent(context, SendDataService.class);
         mIntent.putExtra("artist", intent.getStringExtra("artist"));
         mIntent.putExtra("track", intent.getStringExtra("track"));
-        context.startService(mIntent);
+        //context.startService(mIntent);
     }
 }

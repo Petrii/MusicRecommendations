@@ -9,18 +9,13 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Album;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
-
 public class MainActivity extends ActionBarActivity {
 
     private static final String CLIENT_ID = "1e526b554f064d828866b8042c1918c6";
     private static final String REDIRECT_URI = "musicrecommendations://callback";
     private static final int REQUEST_CODE = 1337;
+    public static String ACCESS_TOKEN;
+    public static ProsessTracks prosessTracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +24,12 @@ public class MainActivity extends ActionBarActivity {
 
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
-        builder.setScopes(new String[]{"user-read-private", "streaming"});
+        builder.setScopes(new String[]{"user-read-private", "playlist-modify-public", "user-read-email", "playlist-modify-private"});
         AuthenticationRequest request = builder.build();
         //AuthenticationClient.clearCookies(this);
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+
+        prosessTracks = new ProsessTracks();
     }
 
     @Override
@@ -44,20 +41,7 @@ public class MainActivity extends ActionBarActivity {
             switch (response.getType()) {
                 // Response was successful and contains auth token
                 case TOKEN:
-                    SpotifyApi api = new SpotifyApi();
-                    api.setAccessToken(response.getAccessToken());
-                    SpotifyService spotify = api.getService();
-                    spotify.getAlbum("2dIGnmEIy1WZIcZCFSj6i8", new Callback<Album>() {
-                        @Override
-                        public void success(Album album, Response response) {
-                            Log.d("Album success", album.name);
-                        }
-
-                        @Override
-                        public void failure(RetrofitError error) {
-                            Log.d("Album failure", error.toString());
-                        }
-                    });
+                    ACCESS_TOKEN = response.getAccessToken();
                     Log.d("Got token", ""+response.getAccessToken());
                     break;
                 // Auth flow returned an error
@@ -70,11 +54,4 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
-
-    @Override
-    protected void onDestroy() {
-        // VERY IMPORTANT! This must always be called or else you will leak resources
-        super.onDestroy();
-    }
-
 }
