@@ -8,26 +8,19 @@ import android.util.Log;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.player.Config;
-import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Player;
-import com.spotify.sdk.android.player.PlayerNotificationCallback;
-import com.spotify.sdk.android.player.PlayerState;
-import com.spotify.sdk.android.player.Spotify;
 
-public class MainActivity extends ActionBarActivity implements
-        PlayerNotificationCallback, ConnectionStateCallback {
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Album;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
-    // TODO: Replace with your client ID
+public class MainActivity extends ActionBarActivity {
+
     private static final String CLIENT_ID = "1e526b554f064d828866b8042c1918c6";
-    // TODO: Replace with your redirect URI
     private static final String REDIRECT_URI = "musicrecommendations://callback";
-
-    // Request code that will be passed together with authentication result to the onAuthenticationResult callback
-    // Can be any integer
     private static final int REQUEST_CODE = 1337;
-
-    private Player mPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +31,7 @@ public class MainActivity extends ActionBarActivity implements
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "streaming"});
         AuthenticationRequest request = builder.build();
-        AuthenticationClient.clearCookies(this);
+        //AuthenticationClient.clearCookies(this);
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
     }
 
@@ -46,77 +39,42 @@ public class MainActivity extends ActionBarActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
-                mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-                    @Override
-                    public void onInitialized(Player player) {
-                        mPlayer.addConnectionStateCallback(MainActivity.this);
-                        mPlayer.addPlayerNotificationCallback(MainActivity.this);
-                        mPlayer.play("spotify:track:2TpxZ7JUBn3uw46aR7qd6V");
-                    }
+            switch (response.getType()) {
+                // Response was successful and contains auth token
+                case TOKEN:
+                    SpotifyApi api = new SpotifyApi();
+                    api.setAccessToken(response.getAccessToken());
+                    SpotifyService spotify = api.getService();
+                    spotify.getAlbum("2dIGnmEIy1WZIcZCFSj6i8", new Callback<Album>() {
+                        @Override
+                        public void success(Album album, Response response) {
+                            Log.d("Album success", album.name);
+                        }
 
-                    @Override
-                    public void onError(Throwable throwable) {
-                        Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-                    }
-                });
+                        @Override
+                        public void failure(RetrofitError error) {
+                            Log.d("Album failure", error.toString());
+                        }
+                    });
+                    Log.d("Got token", ""+response.getAccessToken());
+                    break;
+                // Auth flow returned an error
+                case ERROR:
+                    Log.d("Auth error",""+response.getError());
+                    break;
+                // Most likely auth flow was cancelled
+                default:
+                    Log.d("Auth result",""+response.getType());
             }
-        }
-    }
-
-    @Override
-    public void onLoggedIn() {
-        Log.d("MainActivity", "User logged in");
-    }
-
-    @Override
-    public void onLoggedOut() {
-        Log.d("MainActivity", "User logged out");
-    }
-
-    @Override
-    public void onLoginFailed(Throwable error) {
-        Log.d("MainActivity", "Login failed");
-    }
-
-    @Override
-    public void onTemporaryError() {
-        Log.d("MainActivity", "Temporary error occurred");
-    }
-
-    @Override
-    public void onConnectionMessage(String message) {
-        Log.d("MainActivity", "Received connection message: " + message);
-    }
-
-    @Override
-    public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-        Log.d("MainActivity", "Playback event received: " + eventType.name());
-        switch (eventType) {
-            // Handle event type as necessary
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onPlaybackError(ErrorType errorType, String errorDetails) {
-        Log.d("MainActivity", "Playback error received: " + errorType.name());
-        switch (errorType) {
-            // Handle error type as necessary
-            default:
-                break;
         }
     }
 
     @Override
     protected void onDestroy() {
         // VERY IMPORTANT! This must always be called or else you will leak resources
-        Spotify.destroyPlayer(this);
         super.onDestroy();
     }
+
 }
