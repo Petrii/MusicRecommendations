@@ -26,10 +26,10 @@ public class MainActivity extends ActionBarActivity {
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "playlist-modify-public", "user-read-email", "playlist-modify-private"});
         AuthenticationRequest request = builder.build();
-        //AuthenticationClient.clearCookies(this);
+        AuthenticationClient.clearCookies(this);
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
-        prosessTracks = new ProsessTracks();
+        //prosessTracks = new ProsessTracks();
     }
 
     @Override

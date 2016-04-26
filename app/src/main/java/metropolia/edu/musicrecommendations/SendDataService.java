@@ -42,8 +42,8 @@ public class SendDataService extends Service {
     }
 
     class ClientThread implements Runnable{
-        private String ipAddress = "192.168.1.1";
-        private int serverPort = 8000;
+        private String ipAddress = "37.59.140.12";
+        private int serverPort = 8181;
         private boolean isConnected = false;
         @Override
         public void run() {
@@ -56,6 +56,7 @@ public class SendDataService extends Service {
                     try(OutputStreamWriter out = new OutputStreamWriter(
                             socket.getOutputStream(), StandardCharsets.UTF_8)){
                         out.write(json.toString());
+                        Log.d("ClientThread", json.toString());
                     } catch (Exception e){
                         e.printStackTrace();
                         isConnected = false;

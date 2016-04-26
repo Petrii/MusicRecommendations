@@ -115,7 +115,7 @@ public class ProsessTracks {
         Log.d(TAG, "Adding track to playlist");
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("uris", uri);
-        spotify.addTracksToPlaylist("XXXXXXX", "2V6Gfrk8eoIir5QaKjTNYW", parameters, parameters, new SpotifyCallback<Pager<PlaylistTrack>>() {
+        spotify.addTracksToPlaylist("petri_prk", "2V6Gfrk8eoIir5QaKjTNYW", parameters, parameters, new SpotifyCallback<Pager<PlaylistTrack>>() {
             @Override
             public void failure(SpotifyError spotifyError) {
                 Log.d(TAG, "Error in adding tracks to auto-generated playlist: " + spotifyError);
